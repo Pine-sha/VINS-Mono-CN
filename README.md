@@ -1,3 +1,6 @@
+# VINS-Mono-CN
+This is a cn-description of VINS-Mono.
+
 # VINS-Mono
 ## A Robust and Versatile Monocular Visual-Inertial State Estimator
 
