@@ -246,7 +246,7 @@ void process_loop_detection()
         m_keyframe_buf.unlock();
         if (cur_kf != NULL)
         {
-            cur_kf->global_index = global_frame_cnt; //全局global_frame_cnt,用于对关键图像数据帧的计数
+            cur_kf->global_index = global_frame_cnt; //global_frame_cnt,用于对关键图像数据帧的全局计数
             m_keyframedatabase_resample.lock();
             keyframe_database.add(cur_kf);       //将keyframe_buf中取出的这一帧,存入关键帧数据库
             m_keyframedatabase_resample.unlock();
@@ -259,9 +259,9 @@ void process_loop_detection()
             vector<cv::Point2f> cur_pts;
             vector<cv::Point2f> old_pts;
             TicToc t_brief;
-            cur_kf->extractBrief(current_image);
+            cur_kf->extractBrief(current_image); //提取更加多的特征点以及相应的描述子,在前端视觉追踪过程中提取的特征点对于闭环检测是不够的.
             //printf("loop extract %d feature using %lf\n", cur_kf->keypoints.size(), t_brief.toc());
-            TicToc t_loopdetect;
+            TicToc t_loopdetect; //通过startLoopClosure()来检测闭环,并保存结果到 cur_pts, old_pts, old_index
             loop_succ = loop_closure->startLoopClosure(cur_kf->keypoints, cur_kf->descriptors, cur_pts, old_pts, old_index);
             double t_loop = t_loopdetect.toc();
             ROS_DEBUG("t_loopdetect %f ms", t_loop);
@@ -276,24 +276,24 @@ void process_loop_detection()
                 ROS_DEBUG("loop succ %d with %drd image", global_frame_cnt, old_index);
                 assert(old_index!=-1);
                 
-                Vector3d T_w_i_old, PnP_T_old;
-                Matrix3d R_w_i_old, PnP_R_old;
+                Vector3d T_w_i_old, PnP_T_old; //? PnP_T_old pnp平移
+                Matrix3d R_w_i_old, PnP_R_old;// PnP_T_old pnp平移
 
-                old_kf->getPose(T_w_i_old, R_w_i_old);
-                std::vector<cv::Point2f> measurements_old;
+                old_kf->getPose(T_w_i_old, R_w_i_old); //旋转和平移
+                std::vector<cv::Point2f> measurements_old; //vector<2维float点类型>
                 std::vector<cv::Point2f> measurements_old_norm;
                 std::vector<cv::Point2f> measurements_cur;
-                std::vector<int> features_id_matched;  
+                std::vector<int> features_id_matched;  //findConnectionWithOldFrame()求解闭环处两点的 R,T
                 cur_kf->findConnectionWithOldFrame(old_kf, measurements_old, measurements_old_norm, PnP_T_old, PnP_R_old, m_camera);
                 measurements_cur = cur_kf->measurements_matched;
                 features_id_matched = cur_kf->features_id_matched;
                 // send loop info to VINS relocalization
-                int loop_fusion = 0;
+                int loop_fusion = 0; //fusion 融合
                 if( (int)measurements_old_norm.size() > MIN_LOOP_NUM && global_frame_cnt - old_index > 35 && old_index > 30)
                 {
 
                     Quaterniond PnP_Q_old(PnP_R_old);
-                    RetriveData retrive_data;
+                    RetriveData retrive_data;  //数据采集
                     retrive_data.cur_index = cur_kf->global_index;
                     retrive_data.header = cur_kf->header;
                     retrive_data.P_old = T_w_i_old;
@@ -310,16 +310,16 @@ void process_loop_detection()
                     retrive_data.loop_pose[5] = PnP_Q_old.z();
                     retrive_data.loop_pose[6] = PnP_Q_old.w();
                     m_retrive_data_buf.lock();
-                    retrive_data_buf.push(retrive_data);
+                    retrive_data_buf.push(retrive_data); //采集闭环成功的当前帧到buf
                     m_retrive_data_buf.unlock();
                     cur_kf->detectLoop(old_index);
                     old_kf->is_looped = 1;
                     loop_fusion = 1;
 
                     m_update_visualization.lock();
-                    keyframe_database.addLoop(old_index);
+                    keyframe_database.addLoop(old_index); //getLastKeyframe()与 getKeyframe(loop_index) 构成闭环,并构建一条闭环边
                     CameraPoseVisualization* posegraph_visualization = keyframe_database.getPosegraphVisualization();
-                    pubPoseGraph(posegraph_visualization, cur_header);  
+                    pubPoseGraph(posegraph_visualization, cur_header); //pub 到 topic "pose_graph"
                     m_update_visualization.unlock();
                 }
 
