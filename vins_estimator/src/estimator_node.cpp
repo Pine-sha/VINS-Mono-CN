@@ -276,21 +276,21 @@ void process_loop_detection()
                 ROS_DEBUG("loop succ %d with %drd image", global_frame_cnt, old_index);
                 assert(old_index!=-1);
                 
-                Vector3d T_w_i_old, PnP_T_old; //? PnP_T_old pnp平移
+                Vector3d T_w_i_old, PnP_T_old; // PnP_T_old pnp平移
                 Matrix3d R_w_i_old, PnP_R_old;// PnP_T_old pnp平移
 
                 old_kf->getPose(T_w_i_old, R_w_i_old); //旋转和平移
                 std::vector<cv::Point2f> measurements_old; //vector<2维float点类型>
-                std::vector<cv::Point2f> measurements_old_norm;
-                std::vector<cv::Point2f> measurements_cur;
-                std::vector<int> features_id_matched;  //findConnectionWithOldFrame()求解闭环处两点的 R,T
+                std::vector<cv::Point2f> measurements_old_norm;//?
+                std::vector<cv::Point2f> measurements_cur;//?
+                std::vector<int> features_id_matched;  //findConnectionWithOldFrame(): pnp方式求解闭环处两点的 R,T
                 cur_kf->findConnectionWithOldFrame(old_kf, measurements_old, measurements_old_norm, PnP_T_old, PnP_R_old, m_camera);
                 measurements_cur = cur_kf->measurements_matched;
                 features_id_matched = cur_kf->features_id_matched;
                 // send loop info to VINS relocalization
                 int loop_fusion = 0; //fusion 融合
                 if( (int)measurements_old_norm.size() > MIN_LOOP_NUM && global_frame_cnt - old_index > 35 && old_index > 30)
-                {
+                {//?
 
                     Quaterniond PnP_Q_old(PnP_R_old);
                     RetriveData retrive_data;  //数据采集
@@ -312,12 +312,12 @@ void process_loop_detection()
                     m_retrive_data_buf.lock();
                     retrive_data_buf.push(retrive_data); //采集闭环成功的当前帧到buf
                     m_retrive_data_buf.unlock();
-                    cur_kf->detectLoop(old_index);
-                    old_kf->is_looped = 1;
+                    cur_kf->detectLoop(old_index); //设置cuf_kf对应的闭环标志位和闭环帧编号
+                    old_kf->is_looped = 1; // 注意区分 has_loop 和 is_loop
                     loop_fusion = 1;
 
                     m_update_visualization.lock();
-                    keyframe_database.addLoop(old_index); //getLastKeyframe()与 getKeyframe(loop_index) 构成闭环,并构建一条闭环边
+                    keyframe_database.addLoop(old_index); //addLoop 调用了 getLastKeyframe()与 getKeyframe(loop_index) 构成闭环,并构建一条闭环边
                     CameraPoseVisualization* posegraph_visualization = keyframe_database.getPosegraphVisualization();
                     pubPoseGraph(posegraph_visualization, cur_header); //pub 到 topic "pose_graph"
                     m_update_visualization.unlock();
@@ -325,7 +325,7 @@ void process_loop_detection()
 
 
                 // visualization loop info
-                if(0 && loop_fusion)
+                if(0 && loop_fusion) //?
                 {
                     int COL = current_image.cols;
                     //int ROW = current_image.rows;
@@ -362,7 +362,7 @@ void process_loop_detection()
                     {
                         cv::Point2f cur_pt = measurements_cur[i];
                         cur_pt.x += COL;
-                        cv::circle(loop_match_img2, cur_pt, 5, cv::Scalar(0, 255, 0));
+                        cv::circle(loop_match_img2, cur_pt, 5, cv::Scalar(0, 255, 0));//以单一灰度和颜色Scalar(0, 255, 0)绘制圆
                     }
                     for(int i = 0; i< (int)measurements_old.size(); i++)
                     {
@@ -373,28 +373,28 @@ void process_loop_detection()
                         cv::Point2f cur_pt = measurements_cur[i];
                         cur_pt.x += COL ;
                         cv::line(loop_match_img2, measurements_old[i], cur_pt, cv::Scalar(0, 255, 0), 1, 8, 0);
-                    }
+                    } //画线
 
                     ostringstream convert2;
                     convert2 << "/home/tony-ws/raw_data/loop_image/"
                             << cur_kf->global_index << "-" 
                             << old_index << "-" << loop_fusion <<"-2.jpg";
-                    cv::imwrite( convert2.str().c_str(), loop_match_img2);
+                    cv::imwrite( convert2.str().c_str(), loop_match_img2); //保存闭环图像
                 }
                   
             }
             //release memory
             cur_kf->image.release();
-            global_frame_cnt++; //关键帧数据库_全局编号
+            global_frame_cnt++; //关键帧数据库_全局编号++
 
-            if (t_loop > 1000 || keyframe_database.size() > MAX_KEYFRAME_NUM)
+            if (t_loop > 1000 || keyframe_database.size() > MAX_KEYFRAME_NUM) //loop的时间 > 1000 ms
             {
                 m_keyframedatabase_resample.lock();
                 erase_index.clear();
-                keyframe_database.downsample(erase_index);
+                keyframe_database.downsample(erase_index); //降采样
                 m_keyframedatabase_resample.unlock();
                 if(!erase_index.empty())
-                    loop_closure->eraseIndex(erase_index);
+                    loop_closure->eraseIndex(erase_index); //减少loop_closure 维护的规模  BOWS的相关demo
             }
         }
         std::chrono::milliseconds dura(10);
@@ -425,7 +425,7 @@ void process_pose_graph()
                                                     correct_r); //4自由度全局位姿图优化, 更新 R t
             ROS_DEBUG("t_posegraph %f ms", t_posegraph.toc()); //优化用时
             m_loop_drift.lock();
-            relocalize_r = correct_r;
+            relocalize_r = correct_r;//保存修正的r到全局变量,供其他线程使用
             relocalize_t = correct_t;
             m_loop_drift.unlock();
             m_update_visualization.lock();
@@ -459,7 +459,7 @@ void process()
         for (auto &measurement : measurements)
         {
             for (auto &imu_msg : measurement.first)
-                send_imu(imu_msg); //发送数据,调用 estimator.processIMU(),处理imu
+                send_imu(imu_msg); //发送数据,调用 estimator.processIMU(),imu处理算法
 
             auto img_msg = measurement.second; //sensor_msgs::PointCloud
             ROS_DEBUG("processing vision data with stamp %f \n", img_msg->header.stamp.toSec());
@@ -475,9 +475,9 @@ void process()
                 double y = img_msg->points[i].y;
                 double z = img_msg->points[i].z;
                 ROS_ASSERT(z == 1);
-                image[feature_id].emplace_back(camera_id, Vector3d(x, y, z));
+                image[feature_id].emplace_back(camera_id, Vector3d(x, y, z)); //对图像追踪的结果,进行特征点数据的 整理维护
             }
-            estimator.processImage(image, img_msg->header); //处理图像
+            estimator.processImage(image, img_msg->header); //图像处理算法
             /**
             *** start build keyframe database for loop closure
             **/
@@ -487,26 +487,26 @@ void process()
                 vector<RetriveData>::iterator it = estimator.retrive_data_vector.begin();
                 for(; it != estimator.retrive_data_vector.end(); )
                 {
-                    if ((*it).header < estimator.Headers[0].stamp.toSec())
+                    if ((*it).header < estimator.Headers[0].stamp.toSec()) //时间判定
                     {
-                        it = estimator.retrive_data_vector.erase(it);
+                        it = estimator.retrive_data_vector.erase(it); //返回删除迭代器的下一位
                     }
                     else
                         it++;
-                }
+                }//清除estimator.retrive_data_vector前一个闭环，添加最新retrive
                 m_retrive_data_buf.lock();
-                while(!retrive_data_buf.empty()) //闭环检测中压入数据
+                while(!retrive_data_buf.empty()) //process_loop_detection()中产生retrive_data 到buf
                 {
                     RetriveData tmp_retrive_data = retrive_data_buf.front();
                     retrive_data_buf.pop();
-                    estimator.retrive_data_vector.push_back(tmp_retrive_data);
+                    estimator.retrive_data_vector.push_back(tmp_retrive_data); //更新retrive_data_vector的数据
                 }
                 m_retrive_data_buf.unlock();
-                //WINDOW_SIZE - 2 is key frame
+                //WINDOW_SIZE - 2 is key frame  //经过前面检测,最新第二帧是关键帧,则将这帧添加到 keyframe_buf
                 if(estimator.marginalization_flag == 0 && estimator.solver_flag == estimator.NON_LINEAR)
                 {   
-                    Vector3d vio_T_w_i = estimator.Ps[WINDOW_SIZE - 2];
-                    Matrix3d vio_R_w_i = estimator.Rs[WINDOW_SIZE - 2];
+                    Vector3d vio_T_w_i = estimator.Ps[WINDOW_SIZE - 2];//全局T
+                    Matrix3d vio_R_w_i = estimator.Rs[WINDOW_SIZE - 2];//全局R
                     i_buf.lock();
                     while(!image_buf.empty() && image_buf.front().second < estimator.Headers[WINDOW_SIZE - 2].stamp.toSec())
                     {
@@ -521,11 +521,11 @@ void process()
                     const char *pattern_file = PATTERN_FILE.c_str();
                     Vector3d cur_T;
                     Matrix3d cur_R;
-                    cur_T = relocalize_r * vio_T_w_i + relocalize_t;
+                    cur_T = relocalize_r * vio_T_w_i + relocalize_t; //relocalize_r在process_pose_graph()线程中更新
                     cur_R = relocalize_r * vio_R_w_i;
                     KeyFrame* keyframe = new KeyFrame(estimator.Headers[WINDOW_SIZE - 2].stamp.toSec(), vio_T_w_i, vio_R_w_i, cur_T, cur_R, image_buf.front().first, pattern_file);
                     keyframe->setExtrinsic(estimator.tic[0], estimator.ric[0]); //ric、tic：设置IMU与camera之间的外参
-                    keyframe->buildKeyFrameFeatures(estimator, m_camera); //将空间的3D点构建当前关键帧的特征点
+                    keyframe->buildKeyFrameFeatures(estimator, m_camera); //以estimator中的空间的3D点,构建当前关键帧的特征点
                     m_keyframe_buf.lock();
                     keyframe_buf.push(keyframe); //添加到关键帧队列中
                     m_keyframe_buf.unlock();
@@ -540,13 +540,13 @@ void process()
                                 ROS_DEBUG("Wrong loop");
                                 cur_kf->removeLoop();
                             }
-                            else 
+                            else //是正确的闭环: 将此次闭环检测结果,添加到位图优化缓冲区
                             {
                                 cur_kf->updateLoopConnection( estimator.retrive_data_vector[0].relative_t, 
                                                               estimator.retrive_data_vector[0].relative_q, 
                                                               estimator.retrive_data_vector[0].relative_yaw);
                                 m_posegraph_buf.lock();
-                                optimize_posegraph_buf.push(estimator.retrive_data_vector[0].cur_index); //将此次闭环检测结果,添加到位图优化缓冲区
+                                optimize_posegraph_buf.push(estimator.retrive_data_vector[0].cur_index);
                                 m_posegraph_buf.unlock();
                             }
                         }
@@ -561,7 +561,7 @@ void process()
             m_loop_drift.lock();
             if (estimator.relocalize)
             {
-                relocalize_t = estimator.relocalize_t;
+                relocalize_t = estimator.relocalize_t; //?与process_pose_graph()线程中更新,有何区别
                 relocalize_r = estimator.relocalize_r;
             }
             pubOdometry(estimator, header, relocalize_t, relocalize_r); //给RVIZ发送里程计信息、关键位置、相机位置、点云和TF关系
