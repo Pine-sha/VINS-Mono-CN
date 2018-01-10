@@ -190,7 +190,7 @@ void CameraPoseVisualization::publish_by( ros::Publisher &pub, const std_msgs::H
 	visualization_msgs::MarkerArray markerArray_msg;
 	
 	for(auto& marker : m_markers) {
-		marker.header = header;
+        marker.header = header;//marker.pose.orientation.w = 1;
 		markerArray_msg.markers.push_back(marker);
 	}
 
