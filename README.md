@@ -2,6 +2,13 @@
 This is a cn-description of VINS-Mono.
 为VINS-Mono项目增加中文注释.
 
+# 系统启动命令
+```
+$ roslaunch vins_estimator euroc.launch
+$ roslaunch vins_estimator vins_rviz.launch
+$ rosbag play YOUR_PATH_TO_DATASET/MH_05_medium.bag
+$ roslaunch benchmark_publisher publish.launch  sequence_name:=MH_05_medium
+```
 # VINS-Mono
 ## A Robust and Versatile Monocular Visual-Inertial State Estimator
 
@@ -11,25 +18,25 @@ VINS-Mono is a real-time SLAM framework for **Monocular Visual-Inertial Systems*
 
 **Videos:**
 
-<a href="https://www.youtube.com/embed/mv_9snb_bKs" target="_blank"><img src="http://img.youtube.com/vi/mv_9snb_bKs/0.jpg" 
+<a href="https://www.youtube.com/embed/mv_9snb_bKs" target="_blank"><img src="http://img.youtube.com/vi/mv_9snb_bKs/0.jpg"
 alt="euroc" width="240" height="180" border="10" /></a>
-<a href="https://www.youtube.com/embed/g_wN0Nt0VAU" target="_blank"><img src="http://img.youtube.com/vi/g_wN0Nt0VAU/0.jpg" 
+<a href="https://www.youtube.com/embed/g_wN0Nt0VAU" target="_blank"><img src="http://img.youtube.com/vi/g_wN0Nt0VAU/0.jpg"
 alt="indoor_outdoor" width="240" height="180" border="10" /></a>
-<a href="https://www.youtube.com/embed/I4txdvGhT6I" target="_blank"><img src="http://img.youtube.com/vi/I4txdvGhT6I/0.jpg" 
+<a href="https://www.youtube.com/embed/I4txdvGhT6I" target="_blank"><img src="http://img.youtube.com/vi/I4txdvGhT6I/0.jpg"
 alt="AR_demo" width="240" height="180" border="10" /></a>
 
 EuRoC dataset;                  Indoor and outdoor performance;                         AR application;
 
-<a href="https://www.youtube.com/embed/2zE84HqT0es" target="_blank"><img src="http://img.youtube.com/vi/2zE84HqT0es/0.jpg" 
+<a href="https://www.youtube.com/embed/2zE84HqT0es" target="_blank"><img src="http://img.youtube.com/vi/2zE84HqT0es/0.jpg"
 alt="MAV platform" width="240" height="180" border="10" /></a>
-<a href="https://www.youtube.com/embed/CI01qbPWlYY" target="_blank"><img src="http://img.youtube.com/vi/CI01qbPWlYY/0.jpg" 
+<a href="https://www.youtube.com/embed/CI01qbPWlYY" target="_blank"><img src="http://img.youtube.com/vi/CI01qbPWlYY/0.jpg"
 alt="Mobile platform" width="240" height="180" border="10" /></a>
 
  MAV application;               Mobile implementation (Video link for mainland China friends: [Video1](http://www.bilibili.com/video/av10813254/) [Video2](http://www.bilibili.com/video/av10813205/) [Video3](http://www.bilibili.com/video/av10813089/) [Video4](http://www.bilibili.com/video/av10813325/) [Video5](http://www.bilibili.com/video/av10813030/))
 
 **Related Papers**
-* **VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator**, Tong Qin, Peiliang Li, Zhenfei Yang, Shaojie Shen [arXiv:1708.03852](https://arxiv.org/abs/1708.03852v1) 
-* **Autonomous Aerial Navigation Using Monocular Visual-Inertial Fusion**, Yi Lin, Fei Gao, Tong Qin, Wenliang Gao, Tianbo Liu, William Wu, Zhenfei Yang, Shaojie Shen, J Field Robotics. 2017;00:1–29. [https://doi.org/10.1002/rob.21732](https://doi.org/10.1002/rob.21732)  
+* **VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator**, Tong Qin, Peiliang Li, Zhenfei Yang, Shaojie Shen [arXiv:1708.03852](https://arxiv.org/abs/1708.03852v1)
+* **Autonomous Aerial Navigation Using Monocular Visual-Inertial Fusion**, Yi Lin, Fei Gao, Tong Qin, Wenliang Gao, Tianbo Liu, William Wu, Zhenfei Yang, Shaojie Shen, J Field Robotics. 2017;00:1–29. [https://doi.org/10.1002/rob.21732](https://doi.org/10.1002/rob.21732)
 ```
 @article{qin2017vins,
   title={VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator},
@@ -42,10 +49,10 @@ alt="Mobile platform" width="240" height="180" border="10" /></a>
 @article{Lin17,
   Author = {Y. Lin and F. Gao and T. Qin and W. Gao and T. Liu and W. Wu and Z. Yang and S. Shen},
   Journal = jfr,
-  Title = {Autonomous Aerial Navigation Using Monocular Visual-Inertial Fusion},  
+  Title = {Autonomous Aerial Navigation Using Monocular Visual-Inertial Fusion},
   Volume = {00},
   Pages = {1-29},
-  Year = {2017}} 
+  Year = {2017}}
 ```
 *If you use VINS-Mono for your academic research, please cite at least one of our related papers.*
 
@@ -57,14 +64,14 @@ additional ROS pacakge
 ```
     sudo apt-get install ros-YOUR_DISTRO-cv-bridge ros-YOUR_DISTRO-tf ros-YOUR_DISTRO-message-filters ros-YOUR_DISTRO-image-transport
 ```
-If you install ROS Kinetic, please update opencv3 with 
+If you install ROS Kinetic, please update opencv3 with
 ```
     sudo apt-get install ros-kinetic-opencv3
 ```
 
 1.2. **Ceres Solver**
 Follow [Ceres Installation](http://ceres-solver.org/installation.html), remember to **make install**.
-(Our testing environment: Ubuntu 14.04, ROS Indigo, OpenCV 2.4.8, Eigen 3.2.0) 
+(Our testing environment: Ubuntu 14.04, ROS Indigo, OpenCV 2.4.8, Eigen 3.2.0)
 
 ## 2. Build VINS-Mono on ROS
 Clone the repository and catkin_make:
@@ -81,9 +88,9 @@ Clone the repository and catkin_make:
 
 3.2 Open three terminals, launch the vins_estimator , rviz and play the bag file respectively. Take MH_05 as example
 ```
-    roslaunch vins_estimator euroc.launch 
+    roslaunch vins_estimator euroc.launch
     roslaunch vins_estimator vins_rviz.launch
-    rosbag play YOUR_PATH_TO_DATASET/MH_05_difficult.bag 
+    rosbag play YOUR_PATH_TO_DATASET/MH_05_difficult.bag
 ```
 (If you fail to open vins_rviz.launch, just open an empty rviz, then load the config file: file -> Open Config-> YOUR_VINS_FOLDER/config/vins_rviz_config.rviz)
 /vins_estimator/path is the IMU center's trajectory, /vins_estimator/odometry is the IMU center's odometry and /vins_estimator/camera_pose is the camera's pose.
@@ -92,8 +99,8 @@ Clone the repository and catkin_make:
 ```
     roslaunch benchmark_publisher publish.launch  sequence_name:=MH_05_difficult
 ```
- (Green line is VINS result, red line is ground truth). 
- 
+ (Green line is VINS result, red line is ground truth).
+
 3.4 (Optional) You can even run EuRoC **without extrinsic parameters** between camera and IMU. We will calibrate them online. Replace the first command with:
 ```
     roslaunch vins_estimator euroc_no_extrinsic_param.launch
@@ -107,11 +114,11 @@ Clone the repository and catkin_make:
 ```
     roslaunch ar_demo 3dm_bag.launch
     roslaunch ar_demo ar_rviz.launch
-    rosbag play YOUR_PATH_TO_DATASET/ar_box.bag 
+    rosbag play YOUR_PATH_TO_DATASET/ar_box.bag
 ```
-We put one 0.8m x 0.8m x 0.8m virtual box in front of your view. 
+We put one 0.8m x 0.8m x 0.8m virtual box in front of your view.
 
-## 5. Run with your device 
+## 5. Run with your device
 
 Suppose you are familiar with ROS and you can get a camera and an IMU with raw metric measurements in ROS topic, you can follow these steps to set up your device. For beginners, we highly recommend you to first try out [VINS-Mobile](https://github.com/HKUST-Aerial-Robotics/VINS-Mobile) if you have iOS devices since you don't need to set up anything.
 
@@ -127,11 +134,11 @@ If you have seen the config files for EuRoC and AR demos, you can find that we j
 
 5.4 Other parameter settings: Details are included in the config file.
 
-5.5 Performance on different devices: 
+5.5 Performance on different devices:
 
-(global shutter camera + synchronized high-end IMU, e.g. VI-Sensor) > (global shutter camera + synchronized low-end IMU, e.g. camera+DJI A3) > (global camera + unsync high frequency IMU) > (global camera + unsync low frequency IMU) > (rolling camera + unsync low frequency IMU). 
+(global shutter camera + synchronized high-end IMU, e.g. VI-Sensor) > (global shutter camera + synchronized low-end IMU, e.g. camera+DJI A3) > (global camera + unsync high frequency IMU) > (global camera + unsync low frequency IMU) > (rolling camera + unsync low frequency IMU).
 
-**DO NOT** start with a rolling shutter camera and unsync IMU (such as DJI M100 + Logitech web camera) at beginning. 
+**DO NOT** start with a rolling shutter camera and unsync IMU (such as DJI M100 + Logitech web camera) at beginning.
 
 ## 6. Acknowledgements
 We use [ceres solver](http://ceres-solver.org/) for non-linear optimization and [DBoW2](https://github.com/dorian3d/DBoW2) for loop detection, and a generic [camera model](https://github.com/hengli/camodocal).
